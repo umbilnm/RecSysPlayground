@@ -1,0 +1,5 @@
+outs:
+- md5: 6f6a6807627c1046981b2f1bb56c8d45
+  size: 9617677
+  hash: md5
+  path: 5k_selected_items.csv
