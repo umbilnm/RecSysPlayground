@@ -34,20 +34,6 @@ site/
 
 docker-compose.override.yml
 
-/data/
-*.csv
-*.tsv
-*.data
-*.dat
-*.npy
-*.npz
-
-*.h5
-*.hdf5
-*.ckpt
-*.pb
-*.pt
-*.pth
 models/
 checkpoints/
 
