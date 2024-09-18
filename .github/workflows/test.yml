@@ -33,4 +33,4 @@ jobs:
 
     - name: Run tests
       run: |
-        poetry run python tests.py
+        poetry run pytest tests.py
