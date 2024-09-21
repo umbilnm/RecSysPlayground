@@ -7,7 +7,6 @@ def evaluator():
     return Evaluator(top_k=[2], metrics=['NDCG', 'Precision', 'Recall', 'MAP'], predicted_col='predicted_col', true_col='true_col')
 
 def test_specific_sample(evaluator):
-    # Пример с известными значениями для проверки
     data = {
         'true_col': [[1, 2, 3], [4, 5, 6]],
         'predicted_col': [[1, 3, 2], [6, 4, 5]]
@@ -17,11 +16,10 @@ def test_specific_sample(evaluator):
 
     result = evaluator.evaluate(df)
     
-    expected_ndcg = 1.0  # Предсказаны элементы 1 и 3 на первых двух позициях, что совпадает с эталонными на 100% в пересчете на NDCG@2
-    expected_precision = 1.0  # В обоих примерах по 2 из 2 предсказаний совпали с эталонными
-    expected_recall = 2/3  # Для первого примера мы вернули 2 из 3 истинных элементов, это и есть Recall
-    expected_map = 1.0  # Все истинные элементы в правильных позициях, максимальный MAP
-    
+    expected_ndcg = 1.0  
+    expected_precision = 1.0
+    expected_recall = 2/3
+    expected_map = 1.0
     assert round(result['NDCG'][2], 2) == expected_ndcg, f"NDCG@2 is incorrect. Expected {expected_ndcg}, got {result['NDCG'][2]}"
 
     assert round(result['Precision'][2], 2) == expected_precision, f"Precision@2 is incorrect. Expected {expected_precision}, got {result['Precision'][2]}"
