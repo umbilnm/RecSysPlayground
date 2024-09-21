@@ -1,0 +1,9 @@
+stages:
+  split_data:
+    cmd: python src/data/split_data.py data/interim/selected_interactions.csv data/interim/one_week_train.csv data/interim/one_week_test.csv
+    deps:
+      - data/interim/selected_interactions.csv
+    outs:
+     - data/interim/one_week_train.csv
+     - data/interim/one_week_test.csv
+  
