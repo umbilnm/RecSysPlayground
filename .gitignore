@@ -1,7 +1,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+.dvc/
 *.log
 
 venv/
@@ -34,7 +34,7 @@ site/
 
 docker-compose.override.yml
 
-models/
+
 checkpoints/
 
 logs/

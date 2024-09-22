@@ -1,8 +1,0 @@
-[core]
-    remote = myremote
-
-['remote "myremote"']
-    url = s3://umbilnm/
-    endpointurl = https://storage.yandexcloud.net
-    access_key_id = YCAJEX33gGDcchm6XsRzzQKZt
-    secret_access_key = YCNuU836bNT7HVFc_Rmw1mTFWvtEGWQohpyPMp8b
