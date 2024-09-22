@@ -15,3 +15,11 @@ stages:
      - src/data/data_prepare.py
     outs:
       - data/processed/interactions_matrix.npz
+  
+  train_model:
+    cmd: python src/models/train_model.py data/processed/interactions_matrix.npz models/implicit_model.pkl
+    deps:
+      - src/models/train_model.py
+      - data/processed/interactions_matrix.npz
+    outs:
+     - models/implicit_model.pkl.npz
