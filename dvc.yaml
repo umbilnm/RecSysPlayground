@@ -1,9 +1,17 @@
 stages:
   split_data:
-    cmd: python src/data/split_data.py data/interim/selected_interactions.csv data/interim/one_week_train.csv data/interim/one_week_test.csv
+    cmd: python src/data/data_prepare.py split-data -- data/interim/selected_interactions.csv data/interim/one_week_train.csv data/interim/one_week_test.csv
     deps:
       - data/interim/selected_interactions.csv
+      - src/data/data_prepare.py
     outs:
      - data/interim/one_week_train.csv
      - data/interim/one_week_test.csv
-  
+
+  get_interactions_matrix:
+    cmd: python src/data/data_prepare.py get-coo-matrix data/interim/one_week_train.csv data/processed/interactions_matrix.npz
+    deps: 
+     - data/interim/one_week_train.csv
+     - src/data/data_prepare.py
+    outs:
+      - data/processed/interactions_matrix.npz
