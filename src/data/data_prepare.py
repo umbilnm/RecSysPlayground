@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import os
 import click
 import logging
+import json
 from pathlib import Path
 import pandas as pd
 import scipy.sparse as sp
@@ -40,15 +42,16 @@ def split_data(input, train, test):
 
 @cli.command()
 @click.argument('input_path', type=click.Path(exists=True))
-@click.argument('output_path', type=click.Path())
-def get_coo_matrix(input_path: str, output_path: str, user_col='user_id', item_col='item_id', weight_col=None):
+@click.argument('output_folder', type=click.Path())
+def get_coo_matrix(input_path: str, output_folder: str, user_col='user_id', item_col='item_id', weight_col=None):
     train_sample = pd.read_csv(input_path)
     logger = logging.getLogger(__name__)
     logger.info('prepare interactions coo_matrix')
 
-    users_inv_mapping = dict(enumerate(train_sample['user_id'].unique()))
+    users_inv_mapping = {index: int(value) for index, value in enumerate(train_sample['user_id'].unique())}
+
     users_mapping = {v: k for k, v in users_inv_mapping.items()}
-    items_inv_mapping = dict(enumerate(train_sample['item_id'].unique()))
+    items_inv_mapping = {index: int(value) for index, value in enumerate(train_sample['item_id'].unique())}
     items_mapping = {v: k for k, v in items_inv_mapping.items()}
     if weight_col is None:
         weights = np.ones(len(train_sample), dtype=np.float32)
@@ -61,8 +64,17 @@ def get_coo_matrix(input_path: str, output_path: str, user_col='user_id', item_c
         train_sample[user_col].map(users_mapping.get), 
         train_sample[item_col].map(items_mapping.get)
     )
-))
-    sp.save_npz(output_path, interaction_matrix)
+))  
+    if not os.path.exists(output_folder):
+        os.mkdir(output_folder)
+    
+    sp.save_npz(os.path.join(output_folder, "interactions_matrix.npz"), interaction_matrix)
+    with open(os.path.join(output_folder, "users_mapping.json"), 'w') as f:
+        json.dump(users_mapping, f)
+
+    with open(os.path.join(output_folder, "items_inv_mapping.json"), 'w') as f:
+        json.dump(items_inv_mapping, f)
+
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'

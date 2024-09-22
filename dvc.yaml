@@ -9,17 +9,23 @@ stages:
      - data/interim/one_week_test.csv
 
   get_interactions_matrix:
-    cmd: python src/data/data_prepare.py get-coo-matrix data/interim/one_week_train.csv data/processed/interactions_matrix.npz
+    cmd: python src/data/data_prepare.py get-coo-matrix data/interim/one_week_train.csv data/processed/one_week_sample
     deps: 
      - data/interim/one_week_train.csv
      - src/data/data_prepare.py
     outs:
-      - data/processed/interactions_matrix.npz
-  
+      - data/processed/one_week_sample/interactions_matrix.npz
+      - data/processed/one_week_sample/users_mapping.json
+      - data/processed/one_week_sample/items_inv_mapping.json
+
   train_model:
-    cmd: python src/models/train_model.py data/processed/interactions_matrix.npz models/implicit_model.pkl
+    cmd: python src/models/train_model.py data/processed/one_week_sample/interactions_matrix.npz models/implicit_model.pkl
     deps:
+      - data/processed/one_week_sample/interactions_matrix.npz
       - src/models/train_model.py
-      - data/processed/interactions_matrix.npz
+      - data/processed/one_week_sample/users_mapping.json
+      - data/processed/one_week_sample/items_inv_mapping.json
+
     outs:
      - models/implicit_model.pkl.npz
+  

@@ -1,8 +1,10 @@
+import pytest
 from typing import List, Dict, Callable
 from more_itertools import pairwise
 import scipy as sp
 import numpy as np
 import pandas as pd
+from implicit.nearest_neighbours import ItemItemRecommender
 
 class Evaluator:
     def __init__(self, top_k: List[int], metrics: List[str], predicted_col: str, true_col: str):
@@ -339,3 +341,21 @@ def test_map_with_multiple_samples():
     result = evaluator.evaluate(df)
     expected_map = ((1/1 + 2/2) / 5 + (1/1) / 5) / 2
     assert result['MAP'][5] == pytest.approx(expected_map), "MAP должен корректно вычисляться для нескольких пользователей"
+
+
+def generate_implicit_recs_mapper(
+    model: ItemItemRecommender,
+    train_matrix: sp.csr_matrix,
+    top_N: int,
+    user_mapping: dict,
+    item_inv_mapping: dict,
+    filter_already_liked_items: bool = True
+):
+    def _recs_mapper(user):
+        user_id = user_mapping[user]
+        recs = model.recommend(user_id, 
+                               train_matrix.tocsr(), 
+                               N=top_N, 
+                               filter_already_liked_items=filter_already_liked_items)
+        return [item_inv_mapping[item] for item in recs[0]]
+    return _recs_mapper
