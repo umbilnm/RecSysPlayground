@@ -1,7 +1,7 @@
 import pytest
 from typing import List, Dict, Callable
 from more_itertools import pairwise
-import scipy as sp
+import scipy.sparse as sp
 import numpy as np
 import pandas as pd
 from implicit.nearest_neighbours import ItemItemRecommender
