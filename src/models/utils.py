@@ -357,5 +357,5 @@ def generate_implicit_recs_mapper(
                                train_matrix.tocsr(), 
                                N=top_N, 
                                filter_already_liked_items=filter_already_liked_items)
-        return [item_inv_mapping[item] for item in recs[0]]
+        return [item_inv_mapping[str(item)] for item in recs[0]]
     return _recs_mapper

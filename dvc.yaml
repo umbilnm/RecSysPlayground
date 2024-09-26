@@ -28,4 +28,11 @@ stages:
 
     outs:
      - models/implicit_model.pkl.npz
-  
+    
+  model_inference:
+    cmd: python src/models/predict_model.py data/processed/one_week_sample models/implicit_model.pkl.npz  reports/predictions.csv
+    deps: 
+    - src/models/predict_model.py
+    - models/implicit_model.pkl.npz
+    outs:
+    - reports/predictions.csv
