@@ -1,0 +1,89 @@
+schema: '2.0'
+stages:
+  split_data:
+    cmd: python src/data/data_prepare.py split-data -- data/interim/selected_interactions.csv
+      data/interim/one_week_train.csv data/interim/one_week_test.csv
+    deps:
+    - path: data/interim/selected_interactions.csv
+      hash: md5
+      md5: da4cd5648db13ec25ea0a90fc441cad3
+      size: 176717089
+    - path: src/data/data_prepare.py
+      hash: md5
+      md5: 14a5010c6f715055567c1481f988fe9b
+      size: 3101
+    outs:
+    - path: data/interim/one_week_test.csv
+      hash: md5
+      md5: c7fe2d4baf164a7493d6eb1636147085
+      size: 11379559
+    - path: data/interim/one_week_train.csv
+      hash: md5
+      md5: 6e34186499a8c0ddbd0251f8c0238b9d
+      size: 10945799
+  get_interactions_matrix:
+    cmd: python src/data/data_prepare.py get-coo-matrix data/interim/one_week_train.csv
+      data/processed/one_week_sample
+    deps:
+    - path: data/interim/one_week_train.csv
+      hash: md5
+      md5: 6e34186499a8c0ddbd0251f8c0238b9d
+      size: 10945799
+    - path: src/data/data_prepare.py
+      hash: md5
+      md5: 14a5010c6f715055567c1481f988fe9b
+      size: 3101
+    outs:
+    - path: data/processed/one_week_sample/interactions_matrix.npz
+      hash: md5
+      md5: 9b902f8d71818a41edf9025cb4d46171
+      size: 1428335
+    - path: data/processed/one_week_sample/items_inv_mapping.json
+      hash: md5
+      md5: dcfcbbeb2ab7e1c4c0f21a1c029dc6e1
+      size: 62202
+    - path: data/processed/one_week_sample/users_mapping.json
+      hash: md5
+      md5: 69eafb944223bc6d37b6751083572430
+      size: 2408601
+  train_model:
+    cmd: python src/models/train_model.py data/processed/one_week_sample/interactions_matrix.npz
+      models/implicit_model.pkl
+    deps:
+    - path: data/processed/one_week_sample/interactions_matrix.npz
+      hash: md5
+      md5: 9b902f8d71818a41edf9025cb4d46171
+      size: 1428335
+    - path: data/processed/one_week_sample/items_inv_mapping.json
+      hash: md5
+      md5: dcfcbbeb2ab7e1c4c0f21a1c029dc6e1
+      size: 62202
+    - path: data/processed/one_week_sample/users_mapping.json
+      hash: md5
+      md5: 69eafb944223bc6d37b6751083572430
+      size: 2408601
+    - path: src/models/train_model.py
+      hash: md5
+      md5: b4dae0300f5588899e1f1b1f87c6ee87
+      size: 758
+    outs:
+    - path: models/implicit_model.pkl.npz
+      hash: md5
+      md5: cb610964e56bbf066d94fd35f7d746d0
+      size: 989552
+  model_inference:
+    cmd: python src/models/predict_model.py data/processed/one_week_sample models/implicit_model.pkl.npz  reports/predictions.csv
+    deps:
+    - path: models/implicit_model.pkl.npz
+      hash: md5
+      md5: cb610964e56bbf066d94fd35f7d746d0
+      size: 989552
+    - path: src/models/predict_model.py
+      hash: md5
+      md5: 215696d6b45dcb0d00bbcca1dd92f3d4
+      size: 1718
+    outs:
+    - path: reports/predictions.csv
+      hash: md5
+      md5: 3434fcd6bb72f27829b8e4b36350bcfb
+      size: 10223794
