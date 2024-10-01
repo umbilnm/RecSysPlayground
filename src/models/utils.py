@@ -91,9 +91,10 @@ class Evaluator:
                 relevant_count += 1
                 precision_at_i = relevant_count / (i + 1)
                 score += precision_at_i
+                if relevant_count == len(true_sample):
+                    k = relevant_count
 
-        # Если не было релевантных элементов, возвращаем 0
-        return score / min(len(true_sample), k) if true_sample else 0
+        return score / k if true_sample else 0
 
     def _calc_map(
         self, true_items: List[List[int]], predicted_items: List[List[int]]
