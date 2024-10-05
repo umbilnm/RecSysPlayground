@@ -35,4 +35,4 @@ stages:
     - src/models/predict_model.py
     - models/implicit_model.pkl.npz
     outs:
-    - reports/predictions.csv
+    - reports/predictions.csvf

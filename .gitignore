@@ -4,6 +4,8 @@ __pycache__/
 .dvc/
 *.log
 
+
+mlruns/
 venv/
 env/
 ENV/

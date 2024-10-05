@@ -34,10 +34,12 @@ def split_data(input, train, test):
 
     # splitting
     train_sample = data[
-        (data["last_watch_dt"] > start_train_date) & (data["last_watch_dt"] < end_train_date)
+        (data["last_watch_dt"] > start_train_date)
+        & (data["last_watch_dt"] < end_train_date)
     ]
     test_sample = data[
-        (data["last_watch_dt"] > start_test_date) & (data["last_watch_dt"] < end_test_date)
+        (data["last_watch_dt"] > start_test_date)
+        & (data["last_watch_dt"] < end_test_date)
     ]
 
     # saving
@@ -60,12 +62,14 @@ def get_coo_matrix(
     logger.info("prepare interactions coo_matrix")
 
     users_inv_mapping = {
-        index: int(value) for index, value in enumerate(train_sample["user_id"].unique())
+        index: int(value)
+        for index, value in enumerate(train_sample["user_id"].unique())
     }
 
     users_mapping = {v: int(k) for k, v in users_inv_mapping.items()}
     items_inv_mapping = {
-        index: int(value) for index, value in enumerate(train_sample["item_id"].unique())
+        index: int(value)
+        for index, value in enumerate(train_sample["item_id"].unique())
     }
     items_mapping = {v: int(k) for k, v in items_inv_mapping.items()}
     if weight_col is None:
@@ -85,7 +89,9 @@ def get_coo_matrix(
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
 
-    sp.save_npz(os.path.join(output_folder, "interactions_matrix.npz"), interaction_matrix)
+    sp.save_npz(
+        os.path.join(output_folder, "interactions_matrix.npz"), interaction_matrix
+    )
 
     with open(os.path.join(output_folder, "users_mapping.json"), "w") as f:
         json.dump(users_mapping, f)

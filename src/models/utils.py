@@ -1,4 +1,5 @@
 from typing import List, Dict, Callable
+import yaml
 from more_itertools import pairwise
 import scipy.sparse as sp
 import numpy as np
@@ -7,7 +8,9 @@ from implicit.nearest_neighbours import ItemItemRecommender
 
 
 class Evaluator:
-    def __init__(self, top_k: List[int], metrics: List[str], predicted_col: str, true_col: str):
+    def __init__(
+        self, top_k: List[int], metrics: List[str], predicted_col: str, true_col: str
+    ):
         self.result = {}
         self.top_k = top_k
         self.metrics = metrics
@@ -32,7 +35,9 @@ class Evaluator:
         self, true_sample: List[int], predicted_sample: List[int], k: int
     ) -> float:
         dcg = sum(
-            (1 / np.log2(i + 2)) for i, p in enumerate(predicted_sample[:k]) if p in true_sample
+            (1 / np.log2(i + 2))
+            for i, p in enumerate(predicted_sample[:k])
+            if p in true_sample
         )
         idcg = sum((1 / np.log2(i + 2)) for i in range(min(k, len(true_sample))))
         return dcg / idcg if idcg > 0 else 0
@@ -42,7 +47,10 @@ class Evaluator:
     ) -> Dict[int, float]:
         return {
             k: np.mean(
-                [self._calc_ndcg_sample(t, p, k) for t, p in zip(true_items, predicted_items)]
+                [
+                    self._calc_ndcg_sample(t, p, k)
+                    for t, p in zip(true_items, predicted_items)
+                ]
             )
             for k in self.top_k
         }
@@ -60,7 +68,10 @@ class Evaluator:
     ) -> Dict[int, List[float]]:
         return {
             k: np.mean(
-                [self._calc_precision_sample(t, p, k) for t, p in zip(true_items, predicted_items)]
+                [
+                    self._calc_precision_sample(t, p, k)
+                    for t, p in zip(true_items, predicted_items)
+                ]
             )
             for k in self.top_k
         }
@@ -76,7 +87,10 @@ class Evaluator:
     ) -> Dict[int, List[float]]:
         return {
             k: np.mean(
-                [self._calc_recall_sample(t, p, k) for t, p in zip(true_items, predicted_items)]
+                [
+                    self._calc_recall_sample(t, p, k)
+                    for t, p in zip(true_items, predicted_items)
+                ]
             )
             for k in self.top_k
         }
@@ -134,7 +148,6 @@ class TimeRangeSplit:
         periods=None,
         tz=None,
         normalize=False,
-        closed=None,
         train_min_date=None,
         filter_cold_users=True,
         filter_cold_items=True,
@@ -151,7 +164,6 @@ class TimeRangeSplit:
         self.periods = periods
         self.tz = tz
         self.normalize = normalize
-        self.closed = closed
         self.train_min_date = pd.to_datetime(train_min_date, errors="raise")
         self.filter_cold_users = filter_cold_users
         self.filter_cold_items = filter_cold_items
@@ -164,7 +176,6 @@ class TimeRangeSplit:
             periods=periods,
             tz=tz,
             normalize=normalize,
-            closed=closed,
         )
 
         self.max_n_splits = max(0, len(self.date_range) - 1)
@@ -186,7 +197,8 @@ class TimeRangeSplit:
             train_min_mask = df_datetime.notnull()
 
         date_range = self.date_range[
-            (self.date_range >= df_datetime.min()) & (self.date_range <= df_datetime.max())
+            (self.date_range >= df_datetime.min())
+            & (self.date_range <= df_datetime.max())
         ]
 
         for start, end in pairwise(date_range):
@@ -245,25 +257,34 @@ class TimeRangeSplit:
             df_datetime = df_datetime[df_datetime >= self.train_min_date]
 
         date_range = self.date_range[
-            (self.date_range >= df_datetime.min()) & (self.date_range <= df_datetime.max())
+            (self.date_range >= df_datetime.min())
+            & (self.date_range <= df_datetime.max())
         ]
 
         return max(0, len(date_range) - 1)
 
 
-def calculate_novelty(train_interactions: pd.DataFrame, recommendations: pd.DataFrame, top_n):
+def calculate_novelty(
+    train_interactions: pd.DataFrame, recommendations: pd.DataFrame, top_n
+):
     users = recommendations["user_id"].unique()
     n_users = train_interactions["user_id"].nunique()
     n_users_per_item = train_interactions.groupby("item_id")["user_id"].nunique()
 
     recommendations = recommendations.loc[recommendations["rank"] <= top_n].copy()
-    recommendations["n_users_per_item"] = recommendations["item_id"].map(n_users_per_item)
+    recommendations["n_users_per_item"] = recommendations["item_id"].map(
+        n_users_per_item
+    )
     recommendations["n_users_per_item"] = recommendations["n_users_per_item"].fillna(1)
-    recommendations["item_novelty"] = -np.log2(recommendations["n_users_per_item"] / n_users)
+    recommendations["item_novelty"] = -np.log2(
+        recommendations["n_users_per_item"] / n_users
+    )
 
     item_novelties = recommendations[["user_id", "rank", "item_novelty"]]
 
-    miuf_at_k = item_novelties.loc[item_novelties["rank"] <= top_n, ["user_id", "item_novelty"]]
+    miuf_at_k = item_novelties.loc[
+        item_novelties["rank"] <= top_n, ["user_id", "item_novelty"]
+    ]
     miuf_at_k = miuf_at_k.groupby("user_id").agg("mean").squeeze()
 
     return miuf_at_k.reindex(users).mean()
@@ -273,10 +294,14 @@ def compute_metrics(
     train: pd.DataFrame, test: pd.DataFrame, recs: pd.DataFrame, top_N: int
 ) -> pd.Series:
     result = {}
-    test_recs = test.set_index(["user_id", "item_id"]).join(recs.set_index(["user_id", "item_id"]))
+    test_recs = test.set_index(["user_id", "item_id"]).join(
+        recs.set_index(["user_id", "item_id"])
+    )
     test_recs = test_recs.sort_values(by=["user_id", "rank"])
 
-    test_recs["users_item_count"] = test_recs.groupby(level="user_id")["rank"].transform(np.size)
+    test_recs["users_item_count"] = test_recs.groupby(level="user_id")[
+        "rank"
+    ].transform(np.size)
     test_recs["reciprocal_rank"] = (1 / test_recs["rank"]).fillna(0)
     test_recs["cumulative_rank"] = test_recs.groupby(level="user_id").cumcount() + 1
     test_recs["cumulative_rank"] = test_recs["cumulative_rank"] / test_recs["rank"]
@@ -284,17 +309,17 @@ def compute_metrics(
     users_count = test_recs.index.get_level_values("user_id").nunique()
 
     for k in range(1, top_N + 1):
-        hit_k = f"hit@{k}"
+        hit_k = f"hit at {k}"
         test_recs[hit_k] = test_recs["rank"] <= k
-        result[f"Precision@{k}"] = (test_recs[hit_k] / k).sum() / users_count
-        result[f"Recall@{k}"] = (
+        result[f"Precision at {k}"] = (test_recs[hit_k] / k).sum() / users_count
+        result[f"Recall at {k}"] = (
             test_recs[hit_k] / test_recs["users_item_count"]
         ).sum() / users_count
 
-    result[f"MAP@{top_N}"] = (
+    result[f"MAP at {top_N}"] = (
         test_recs["cumulative_rank"] / test_recs["users_item_count"]
     ).sum() / users_count
-    result[f"Novelty@{top_N}"] = calculate_novelty(train, recs, top_N)
+    result[f"Novelty at {top_N}"] = calculate_novelty(train, recs, top_N)
 
     return pd.Series(result)
 
@@ -340,3 +365,16 @@ def generate_implicit_recs_mapper(
         return [item_inv_mapping[str(item)] for item in recs[0]]
 
     return _recs_mapper
+
+
+def load_yaml_config(path: str) -> dict:
+
+    with open(path, "r") as f:
+        config = yaml.safe_load(f)
+
+    return config
+
+
+def save_yaml_config(path: str, config: dict):
+    with open(path, "w") as f:
+        yaml.dump(config, f)

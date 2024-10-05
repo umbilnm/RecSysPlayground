@@ -1,10 +1,4 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.1.0
-    hooks:
-      - id: black
-        language_version: python3
-        args: ["--line-length", "100"]
   - repo: local
     hooks:
       - id: run-tests
